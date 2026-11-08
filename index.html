@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>卡片提示詞｜早安圖・節日賀卡提示詞創作工作室</title>
+<style>
+:root{--bg:#FBF7EF;--card:#FFFDF8;--line:#E6DCC8;--gold:#B8935A;--ink:#3A332B;--mute:#8A7F70;--soft:#F3EBDA;--r:16px}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 "Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif}
+h1,h2,.serif{font-family:"Noto Serif TC","Songti TC","PMingLiU",serif;font-weight:600}
+header{padding:28px 20px 8px;text-align:center}
+header h1{margin:0;font-size:26px;letter-spacing:.04em}
+header p{margin:4px 0 0;color:var(--mute);font-size:14px}
+.wrap{max-width:1240px;margin:0 auto;padding:12px 16px 110px;display:grid;grid-template-columns:45fr 55fr;gap:18px;align-items:start}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;margin-bottom:14px;box-shadow:0 6px 18px rgba(120,100,60,.07)}
+.card h2{margin:0 0 10px;font-size:17px}
+.card h3{margin:12px 0 6px;font-size:13px;color:var(--mute);font-weight:500}
+input[type=text],textarea,select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);font:inherit}
+textarea{resize:vertical;min-height:90px}
+input:focus,textarea:focus,select:focus,button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+.big{font-size:18px;padding:13px 14px}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip,.btn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:999px;padding:6px 13px;font:inherit;font-size:14px;cursor:pointer;min-height:36px}
+.chip:hover{border-color:var(--gold)}
+.chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn{border-radius:12px;padding:10px 16px}
+.btn.pri{background:var(--ink);color:#fff;border-color:var(--ink);font-weight:600}
+.btn.gold{background:var(--gold);color:#fff;border-color:var(--gold)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:8px;max-height:300px;overflow:auto;padding:2px}
+.sc{border:1px solid var(--line);border-radius:12px;padding:8px;background:#fff;cursor:pointer;text-align:left;font:inherit;color:inherit}
+.sc.on{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold) inset}
+.sw{height:26px;border-radius:7px;margin-bottom:6px}
+.sc b{display:block;font-size:13px}.sc small{color:var(--mute);font-size:11px}
+.note{font-size:13px;color:var(--mute);margin:6px 0 0}
+.cp{border:1px solid var(--line);border-radius:12px;padding:9px 12px;background:#fff;margin-bottom:7px;cursor:pointer;font-size:14px}
+.cp.on{border-color:var(--gold);background:var(--soft)}
+.cp i{font-style:normal;font-size:12px;color:var(--gold);margin-right:6px}
+label.r{display:inline-flex;gap:5px;align-items:center;margin-right:12px;cursor:pointer;font-size:14px}
+.out{position:sticky;top:12px}
+#out{min-height:420px;font-size:14px;line-height:1.7;background:#fff}
+.hint{background:var(--soft);border-radius:10px;padding:9px 12px;font-size:13px;margin-top:10px;display:none}
+#toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:9px 18px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:9}
+#toast.show{opacity:1}
+@media(max-width:900px){
+.wrap{grid-template-columns:1fr;padding-bottom:30px}.out{position:static}
+.btn.jump{display:block;width:100%;font-size:16px;padding:13px}}
+.jump{display:none}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+<h1>卡片提示詞</h1>
+<p class="serif" style="font-size:16px;color:var(--ink)">早安圖・節日賀卡提示詞創作工作室</p>
+<p>讓每一份祝福，都成為一件值得分享的藝術作品。</p>
+</header>
+<main class="wrap">
+<section>
+<div class="card">
+<h2>今天想創作什麼祝福？</h2>
+<input id="theme" type="text" class="big" placeholder="例如：早安圖、新年快樂、生日快樂、母親節快樂……">
+<div id="quick"></div>
+<p class="note" id="themeInfo"></p>
+</div>
+
+<div class="card">
+<h2>藝術風格</h2>
+<h3>為這個主題推薦</h3>
+<div class="chips" id="rec"></div>
+<div class="row" style="margin-top:8px"><button class="btn" id="reRec">重新推薦</button><button class="btn" id="free">自由創作</button></div>
+<h3>瀏覽全部 25 種風格</h3>
+<input id="q" type="text" placeholder="搜尋風格，例如：水彩、3D、攝影">
+<div class="chips" id="cats" style="margin:8px 0"></div>
+<div class="grid" id="grid"></div>
+<p class="note" id="styleInfo"></p>
+</div>
+
+<div class="card">
+<h2>祝福文案</h2>
+<div id="copies"></div>
+<div class="row"><button class="btn" id="reCopy">重新推薦</button><button class="btn" id="more">產生更多靈感</button></div>
+<h3>可直接修改</h3>
+<input id="cTitle" type="text" placeholder="主標題">
+<input id="cSub" type="text" placeholder="副標題" style="margin-top:6px">
+<textarea id="cBody" placeholder="祝福內文（一行一句）" style="margin-top:6px"></textarea>
+<input id="cEnd" type="text" placeholder="結尾短句" style="margin-top:6px">
+<p class="note">文案為本工具內建的原創文案，不引用古典詩詞出處。</p>
+</div>
+
+<div class="card">
+<h2>圖片設定</h2>
+<h3>文字畫法</h3>
+<label class="r"><input type="radio" name="tm" value="all" checked>AI 畫全部文字</label>
+<label class="r"><input type="radio" name="tm" value="title">只畫標題</label>
+<label class="r"><input type="radio" name="tm" value="none">完全不畫字</label>
+<p class="note">中文長句容易出現錯字；錯字太多時可改選「只畫標題」或「完全不畫字」。</p>
+<div class="row" style="margin-top:8px">
+<div style="flex:1;min-width:140px"><h3>圖片比例</h3><select id="ratio"></select></div>
+<div style="flex:1;min-width:140px"><h3>構圖方式</h3><select id="comp"></select></div>
+<div style="flex:1;min-width:140px"><h3>色彩偏好</h3><select id="color"></select></div>
+</div>
+<h3>自訂主體描述（選填）</h3>
+<input id="subj" type="text" placeholder="例如：一隻戴著帽子的柴犬在花園裡喝咖啡">
+</div>
+
+<div class="card">
+<h2>署名</h2>
+<input id="sig" type="text" value="Michelle 祝福您" placeholder="留空＝不署名">
+<div class="chips" style="margin-top:8px" id="sigChips"></div>
+<div class="row" style="margin-top:8px" id="posRow"><span class="note">位置</span>
+<label class="r"><input type="radio" name="pos" value="左下角" >左下</label>
+<label class="r"><input type="radio" name="pos" value="右下角" checked>右下</label>
+<label class="r"><input type="radio" name="pos" value="正下方">正下方</label></div>
+</div>
+
+<div class="card">
+<h2>人物參考</h2>
+<label class="r"><input type="checkbox" id="pOn">我會在 ChatGPT／Gemini 附上人物參考照片</label>
+<div id="pBox" style="display:none">
+<h3>人物呈現方式</h3>
+<select id="pMode"><option>保留寫實人物</option><option>藝術插畫人物</option><option>精緻3D Q版人物</option><option>奇幻童話人物</option><option>由所選風格決定</option></select>
+<label class="r" style="margin-top:10px"><input type="checkbox" id="pProt" checked>人物特徵保護（建議開啟）</label>
+</div>
+<p class="note">本工具不會上傳照片，只會在提示詞中加入人物要求。</p>
+</div>
+
+<button class="btn pri jump" id="jump">查看提示詞 ↓</button>
+</section>
+
+<section class="out" id="outSec">
+<div class="card">
+<div class="row" style="justify-content:space-between;margin-bottom:8px">
+<h2 style="margin:0">提示詞輸出</h2>
+<div><label class="r"><input type="radio" name="ver" value="full" checked>完整版</label><label class="r" style="margin:0"><input type="radio" name="ver" value="short">精簡版</label></div>
+</div>
+<textarea id="out" placeholder="輸入主題後，提示詞會依照你的設定即時顯示在這裡。"></textarea>
+<div class="row" style="margin-top:10px">
+<button class="btn pri" id="copy">複製完整提示詞</button>
+<button class="btn gold" id="gpt">開啟 ChatGPT</button>
+<button class="btn gold" id="gem">開啟 Gemini</button>
+<button class="btn" id="clear">清空設定</button>
+</div>
+<div class="hint" id="pHint">請在開啟的 ChatGPT 或 Gemini 對話中，先附上人物照片，再貼上已複製的提示詞。</div>
+<p class="note">開啟按鈕會先複製提示詞再開啟網站，不會自動送出。圖中若有錯字，可以請 AI：「只修正圖中的文字，其他部分保持不變。」</p>
+</div>
+</section>
+</main>
+<div id="toast"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const CATS=['藝術插畫','精緻設計','3D立體','寫實攝影','創意視覺'];
+// [名稱,英文,風格特色與材質,色彩,光線,構圖,色票1,色票2]
+const S=[
+['日系水彩手繪風','Japanese Watercolor','透明水彩質感，筆觸輕盈，色彩自然暈染並帶水痕，保留水彩紙紋理，像精緻的繪本插畫','奶油黃、嫩綠、柔粉','清晨柔和的金色斜陽，陰影透明輕柔','主體偏中下，邊緣暈染留白','#F6E7B4','#BFDDB0'],
+['韓系療癒插畫風','Korean Healing Illustration','簡約療癒插畫，柔和圓潤的線條，平塗加細膩顆粒質感，溫柔可愛','奶油白、霧粉、淡藍','均勻柔光，無強烈陰影','大量留白，主體小巧置中','#F5D9DC','#CFE2F0'],
+['法式復古植物風','French Vintage Botanical','古典植物圖鑑風，細緻鋼筆線條加手工上色，泛黃紙張質感','鼠尾草綠、復古玫瑰、象牙白','午後窗邊的柔和漫射光','花草環繞的對稱構圖','#B7C4A3','#D9A7A0'],
+['奇幻童話插畫風','Fairytale Fantasy','童話繪本筆觸，夢幻森林與發光元素，帶有魔法微光','薰衣草紫、薄荷綠、星光金','神秘柔和的魔法光暈與光點','場景有景深，前中後層次分明','#C9B8E4','#BDE5D3'],
+['東方水墨禪意風','Oriental Ink Zen','墨色濃淡與飛白，宣紙質感，意境悠遠','墨黑、淡灰、點綴朱紅','平淡柔和，以墨色濃淡表現明暗','大量留白，主體偏一側','#4A4A4A','#C9473D'],
+['奢華燙金質感風','Luxury Gold Foil','深色絲絨或霧面卡紙上的金箔燙印，浮凸壓紋，精品包裝質感','香檳金、深墨綠、象牙白','聚光燈下的金屬反光，細緻高光','對稱典雅，金色邊框與角花','#C8A45C','#1F3B33'],
+['維多利亞古典風','Victorian Classic','繁複花紋與蕾絲邊框，古典雕版插畫，復古燙金卡片','酒紅、墨綠、古金','燭光般溫暖的昏黃光線','華麗邊框環繞中央主體','#7A2433','#B79B57'],
+['現代排版設計風','Modern Typographic Design','大膽的字體編排，幾何色塊與留白，海報級平面設計','低飽和大地色加單一點綴色','平面設計，不使用寫實光影','網格式版面，字體為視覺主角','#D8CDBB','#5E7B6B'],
+['日式昭和復古風','Showa Retro','昭和海報風，印刷網點與褪色紙張，懷舊插畫與復古字型','復古紅、芥末黃、青綠','平塗色塊加輕微印刷噪點','海報式分區，圖文並重','#C94F3D','#E0B83E'],
+['浮雕紙藝設計風','Embossed Paper Art','單色厚紙壓花，立體凹凸，紙張纖維質感','米白、淺香檳、柔灰','側光強調浮雕凹凸與柔和陰影','簡潔對稱，主體浮凸於中央','#EFE6D4','#CFC6B4'],
+['3D黏土玩偶風','3D Clay Toy','手捏黏土質感，圓潤可愛，帶微微的指紋痕跡','明亮柔和的糖果色','柔和攝影棚光，淺景深','主體放大置中，如玩具攝影','#F4B8B0','#A9D6E5'],
+['3D立體紙雕風','3D Layered Paper Cut','多層紙雕堆疊，層次陰影，手工紙質感','同色系漸層加金色點綴','層與層之間有柔和陰影，內部透出微光','由近到遠的多層深度','#E9C7A0','#8FB8A8'],
+['微縮場景模型風','Miniature Diorama','移軸攝影效果，迷你擬真的小世界，精細材質','溫暖自然色，飽和適中','柔和日光，淺景深移軸效果','俯視約 45 度，場景置於中央','#CFE0B0','#E7B98B'],
+['水晶玻璃藝術風','Crystal Glass Art','透明折射與焦散光，晶瑩剔透的玻璃雕塑質感','冰藍、透明白、淡金反光','強烈折射、焦散與璀璨高光','主體置中，簡潔背景襯托通透感','#BFE3F2','#F1EEE6'],
+['電影級3D Q版風','Cinematic 3D Chibi','皮克斯式角色，大眼可愛比例，精緻材質','明亮溫暖的高彩度','電影級三點布光，邊緣輪廓光','角色為主，場景有景深','#F7B267','#7FC8F8'],
+['花卉微距攝影風','Floral Macro Photography','露珠與花瓣細節，超淺景深與柔和散景','自然花色搭配柔和綠背景','清晨逆光，露珠閃耀','主花偏三分法位置，背景散景','#E8A5B5','#9CC59A'],
+['電影感晨光風','Cinematic Morning Light','空氣中有光束與微塵，溫暖色調與電影調色','琥珀金、暖橘、深藍陰影','低角度晨光穿透，丁達爾光束','寬銀幕感，前景虛化、主體清晰','#E8A53C','#2E4A6B'],
+['柔焦夢幻攝影風','Soft Focus Dreamy','朦朧光暈與光斑，輕盈透氣的氛圍','粉白、淡金、薄紫','高調柔光，光暈擴散','主體置中，周圍有光斑散景','#F6E8EE','#D9CBEA'],
+['日系底片攝影風','Japanese Film Photography','細微顆粒、輕微漏光與褪色色調，充滿生活感','低飽和暖黃、青綠','自然光，輕微過曝而柔和','隨性自然，像生活中的一個片刻','#E6D49A','#9DB8A5'],
+['奇幻光影攝影風','Fantasy Light Photography','發光粒子與魔幻光線，如夢似幻','深藍、紫、發光金','發光光源與體積光','中心發光，向外放射的層次','#2B2D6B','#E7C15B'],
+['普普藝術風','Pop Art','粗黑輪廓、網點與鮮明色塊，漫畫式活力','鮮紅、亮黃、天藍','平塗色塊，無漸層','大膽置中，色塊分割','#E63946','#FFD23F'],
+['超現實夢境風','Surreal Dreamscape','不合常理的比例與漂浮元素，細膩寫實筆觸','夢幻粉紫、天藍、暖金','柔和而戲劇性的光線，長長的影子','尺度對比強烈，主體漂浮','#D7B8E8','#9CC8E8'],
+['幾何曼陀羅藝術風','Geometric Mandala','對稱放射圖案，精細線條與繁複花紋','金、深藍、寶石色','發光線條，微妙漸層','圓形放射對稱，文字置於中心或下方','#C9A24B','#1E2F5E'],
+['拼貼植物標本風','Botanical Collage','剪貼紙張、壓花與手寫標籤，復古紙質','舊紙米黃、乾燥花色、墨綠','平面柔光，紙張疊層帶小陰影','不規則拼貼，錯落有致','#E3D3AE','#5B7A5E'],
+['中式剪紙藝術風','Chinese Paper Cut','鏤空紅紙剪花，吉祥紋樣與對稱圖案','中國紅、金、暖橘','平面為主，紙層之間有淡淡陰影','對稱的吉祥圖案，窗花式邊框','#C8102E','#E5A93B']
+];
+// 主題資料：關鍵字、名稱、視覺元素、色彩、推薦風格(索引)、專屬文案
+const T=[
+{k:['早安'],n:'早安',e:'晨光、花朵、咖啡、蝴蝶、花園',c:'奶油黃、嫩綠、粉色',s:[0,15,12,20,2],cp:['現代優美詩詞','晨光正好','讓美好從今天開始。','一縷晨光，一份希望。\n願今天的每一步，\n都有溫暖相伴，\n每一份努力，都開出美麗的花。','願您平安喜樂。']},
+{k:['午安'],n:'午安',e:'午後陽光、花茶、綠葉、微風、窗台',c:'暖黃、淺綠、奶白',s:[1,12,18,0,2],cp:['溫暖祝福','午後暖陽','忙碌之中，也要記得歇一歇。','陽光正暖，微風剛好。\n願你放慢腳步，\n喝一杯茶，\n把煩惱留給午後的風。','午安，好好吃飯。']},
+{k:['晚安'],n:'晚安',e:'星空、月亮、柔軟被褥、夜燈、安靜的小鎮',c:'深藍、柔紫、暖金',s:[19,3,17,1,21],cp:['溫暖祝福','星光晚安','把今天的辛苦，輕輕放下。','夜色溫柔，星光相伴。\n願你睡得安穩，\n夢裡有花香，\n明天醒來，又是好天氣。','晚安，好夢。']},
+{k:['新年','春節','過年','元宵','除夕'],n:'新年快樂',e:'牡丹、燈籠、春聯、金色裝飾、祥瑞圖案',c:'中國紅、香檳金、暖橘',s:[24,5,12,8,13],cp:['節日專屬祝福','新春納福','歲歲平安，年年如意。','春風送暖入人間，\n喜樂安康伴歲年。\n願新的一年，\n心有所願，皆能如願。','恭祝新年快樂。']},
+{k:['生日'],n:'生日快樂',e:'蛋糕、花束、氣球、禮物、蠟燭',c:'粉色、奶油黃、天藍',s:[14,10,1,20,17],cp:['節日專屬祝福','生日快樂','願你今天被幸福包圍。','又長一歲，更加閃耀。\n願你心想事成，\n身體健康，\n每一天都像今天一樣開心。','生日快樂！']},
+{k:['母親'],n:'母親節快樂',e:'康乃馨、花束、茶具、手寫卡片、溫暖的居家',c:'粉紅、奶白、淡綠',s:[0,2,1,15,17],cp:['感恩與情感文字','母親節快樂','謝謝您，一直都在。','您的愛，是我一生的溫暖。\n謝謝您的付出與包容，\n願您身體健康，\n每一天都開心自在。','母親節快樂。']},
+{k:['父親'],n:'父親節快樂',e:'咖啡、書本、鋼筆、山景、穩重的老物件',c:'深藍、棕色、暖灰',s:[7,16,18,5,23],cp:['感恩與情感文字','父親節快樂','謝謝您，一路默默守護。','您的肩膀，是我最安心的依靠。\n謝謝您的辛苦，\n願您平安健康，\n笑口常開。','父親節快樂。']},
+{k:['情人'],n:'情人節快樂',e:'玫瑰、愛心、燭光、絲帶、交疊的雙心',c:'玫瑰紅、粉色、香檳金',s:[17,5,6,1,14],cp:['節日專屬祝福','情人節快樂','有你，每一天都是情人節。','遇見你，是最美的意外。\n願我們攜手同行，\n把平凡的日子，\n過成最甜的詩。','情人節快樂。']},
+{k:['端午'],n:'端午節',e:'粽子、艾草、龍舟、香包、荷葉',c:'翠綠、米白、赤紅',s:[4,11,0,23,24],cp:['節日專屬祝福','端午安康','粽香滿溢，平安相伴。','艾草飄香，龍舟競渡。\n願你端午平安，\n身體安康，\n萬事順心。','端午節快樂。']},
+{k:['中秋'],n:'中秋節',e:'圓月、桂花、月餅、玉兔、燈籠',c:'金黃、深藍、暖橘',s:[12,19,24,4,3],cp:['節日專屬祝福','花好月圓','月圓人團圓，幸福永相伴。','一輪明月照人間，\n桂花飄香人團圓。\n願你闔家平安，\n日子圓滿甜蜜。','中秋節快樂。']},
+{k:['重陽'],n:'重陽節',e:'菊花、遠山、楓葉、登高、茱萸',c:'金黃、楓紅、秋綠',s:[4,0,18,23,2],cp:['節日專屬祝福','重陽安康','登高望遠，健康長久。','菊花盛開，秋意正濃。\n願您身體康健，\n笑口常開，\n歲歲重陽，年年安康。','重陽節快樂。']},
+{k:['聖誕'],n:'聖誕快樂',e:'聖誕樹、雪花、星星燈、禮物、鈴鐺',c:'深綠、紅色、金色',s:[12,10,5,14,3],cp:['節日專屬祝福','聖誕快樂','願這個冬天，溫暖又明亮。','雪花輕落，燈火閃爍。\n願你被愛與喜悅圍繞，\n心中有光，\n平安喜樂。','聖誕快樂。']},
+{k:['感恩','平安','喜樂','幸福'],n:'平安喜樂',e:'暖陽、花束、雙手、小鳥、暖茶',c:'奶黃、淺橘、嫩綠',s:[0,1,15,17,2],cp:['溫暖祝福','平安喜樂','願你每一天，都被溫柔以待。','願平安與你同行，\n喜樂與你相伴，\n所到之處皆是風景，\n所遇之人皆是善意。','願您平安喜樂。']},
+{k:['勵志','鼓勵','佳句','哲理'],n:'勵志鼓勵',e:'日出、山巔、道路、飛鳥、新芽',c:'暖橘、天藍、金色',s:[20,16,8,7,0],cp:['勵志人生佳句','向陽而行','願你步步生光。','不必急，慢慢來，\n每一步都算數。\n願你心懷希望，\n所有努力終會發光。','加油，你可以的。']}
+];
+const DEF={n:'',e:'花朵、柔和光線、典雅背景',c:'香檳金、奶白、柔粉',s:[0,1,17,5,15],cp:null};
+const X={
+'早安':[['溫暖祝福','早安好心情','新的一天，從微笑開始。','願你今天\n遇見好心情，\n收到好消息，\n一整天都被溫柔包圍。','早安，加油！']],
+'午安':[['勵志人生佳句','午後小憩','累了就停一停，再出發。','不必急著趕路，\n午後的陽光很好。\n補充一點力氣，\n下午也會順順利利。','午安，辛苦了。']],
+'晚安':[['感恩與情感文字','今夜好眠','謝謝今天努力的你。','不管今天如何，\n你都已經很棒。\n願星光守護你，\n一夜好眠到天亮。','晚安，明天見。']],
+'新年快樂':[['溫暖祝福','萬事如意','新的一年，好運連連。','願你新年\n身體健康，平安順遂，\n工作順利，闔家歡喜，\n好事一件接一件。','新年快樂，萬事如意。']],
+'生日快樂':[['溫暖祝福','歲歲有今朝','今天你最大。','願你的生日\n有蛋糕，有笑聲，\n有最愛的人在身邊，\n所有願望都被聽見。','祝你生日快樂。']],
+'母親節快樂':[['溫暖祝福','感謝有您','您是我最溫柔的港灣。','謝謝您總是把最好的留給我。\n願您健康平安，\n天天被幸福與笑容圍繞。','祝您母親節快樂。']],
+'父親節快樂':[['溫暖祝福','最好的爸爸','謝謝您，永遠是我的依靠。','您的叮嚀，\n是我最深的牽掛。\n願您身體硬朗，\n日日平安自在。','祝您父親節快樂。']],
+'情人節快樂':[['現代優美詩詞','與你相伴','最浪漫的事，是一起慢慢變老。','願我們一直\n有說不完的話，\n牽得住的手，\n和過不完的幸福日子。','情人節快樂。']],
+'端午節':[['溫暖祝福','粽情端午','願你平安順利。','一顆粽子，\n包著滿滿的祝福。\n願你身體健康，\n日子過得順順利利。','端午節快樂。']],
+'中秋節':[['溫暖祝福','月圓人安','願你團圓喜樂。','明月當空，\n思念與祝福同在。\n願你與家人相聚，\n共享這份圓滿。','中秋節快樂。']],
+'重陽節':[['感恩與情感文字','敬老安康','願您福壽延綿。','感謝您一路走來的付出，\n願您秋日安康，\n兒孫繞膝，\n日子安穩舒心。','重陽節快樂。']],
+'聖誕快樂':[['溫暖祝福','平安夜','願你被愛包圍。','在這個寒冷的季節，\n願你擁有溫暖的擁抱，\n身邊都是愛你的人，\n心裡有滿滿的平安。','聖誕快樂。']],
+'平安喜樂':[['古典詩意風格','平安是福','平安喜樂，一生順遂。','願你一路平安，\n日日安康，\n歲月靜好，\n所願皆有回應。','願您平安喜樂。']],
+'勵志鼓勵':[['勵志人生佳句','日日精進','每一天都是新的開始。','昨天已經過去，\n明天仍有可能。\n只要今天用心走一步，\n你就比昨天更靠近夢想。','相信自己。']],
+'結婚紀念日':[['現代優美詩詞','執子之手','歲歲年年，有你真好。','感謝你的陪伴與包容，\n讓平凡的日子，\n都有了溫度。\n願我們一直這樣走下去。','愛你。']],
+'榮退快樂':[['感恩與情感文字','美好新章','人生下半場，更加精彩。','放下忙碌，\n擁抱自由。\n願你身體健康，\n日日有笑容。','退休快樂。']],
+'旅途平安':[['現代優美詩詞','啟程','世界很大，願你平安出發。','出發時，天氣晴朗；\n路上，遇見善意；\n回家時，滿載歡喜。','祝你旅途平安。']]
+};
+T.unshift(
+{k:['結婚','紀念日'],n:'結婚紀念日',e:'玫瑰、對戒、香檳杯、燭光、相伴的剪影',c:'香檳金、玫瑰粉、象牙白',s:[5,6,17,1,14],cp:['節日專屬祝福','結婚紀念日快樂','感謝有你，一路相伴。','走過歲月，\n仍是最初的心動。\n願我們攜手同行，\n把每一天過成禮物。','紀念日快樂。']},
+{k:['退休','榮退'],n:'榮退快樂',e:'咖啡、旅行箱、花園、書本、夕陽',c:'暖橘、天藍、奶白',s:[0,18,12,16,2],cp:['節日專屬祝福','榮退快樂','辛苦了，往後的日子屬於自己。','感謝多年的付出與堅持，\n願你從此\n悠閒自在，\n過上喜歡的生活。','榮退快樂。']},
+{k:['旅途','旅行','出門'],n:'旅途平安',e:'道路、行李箱、飛機、雲海、晚霞',c:'天藍、暖橘、白色',s:[12,16,18,0,19],cp:['溫暖祝福','一路平安','願你旅途愉快，平安歸來。','願一路順風，\n處處皆有好風景。\n途中平安順利，\n帶著滿滿的回憶歸來。','旅途平安。']}
+);
+const GEN=n=>[
+['古典詩意風格',n,'願歲月溫柔，願你安好。','春有百花秋有月，\n夏有涼風冬有雪。\n願你心無掛礙，\n日日皆是好時節。','願您平安喜樂。'],
+['溫暖祝福',n,'願你被溫柔以待。','願每一天\n都有微笑相伴，\n平安喜樂，\n萬事順心。','祝福您'],
+['勵志人生佳句','心向光明','一步一步，慢慢走向美好。','願你不被風雨打倒，\n仍能向陽而行。\n每一份努力，\n都會開花結果。','加油，你很棒。'],
+['感恩與情感文字','感恩有你','因為有你，生活更美好。','謝謝一路的陪伴，\n溫暖了平凡的日子。\n願你的每一天，\n都被愛與善意包圍。','感恩遇見。']];
+const L1=['願你平安喜樂','願你笑口常開','願你所願皆成','願你歲月溫柔','願你被愛包圍'],L2=['日子慢慢變好','心中常有陽光','每一天都值得期待','煩惱隨風而去','幸福一直相伴'],L3=['願所有美好，都如期而至。','願你一直被溫柔以待。','願你前路有光，身邊有愛。'];
+const RATIO={'直式 9:16':'直式 9:16','正方形 1:1':'正方形 1:1','橫式 4:3':'橫式 4:3','橫式 16:9':'橫式 16:9'};
+const COMP={'中央主體式':'主體置中，視覺重心穩定，文字置於主體上方或下方','上文下圖':'上方約三分之一為文字區，下方三分之二為主體與場景','四周花框式':'以精緻的花卉或圖案框住畫面四周，文字與主體位於中央','電影海報式':'電影海報式構圖，主體突出、有景深，標題大而醒目'};
+const COLOR={'AI 自動推薦':'','暖色系':'整體採用暖色系','冷色系':'整體採用冷色系','粉彩系':'整體採用柔和粉彩色系','大地色系':'整體採用大地色系','金色奢華系':'整體採用金色奢華色系，搭配深色或象牙白襯托'};
+const QUICK={'日常':['早安','午安','晚安','平安喜樂','幸福快樂','感恩祝福'],'節日':['新年快樂','春節','元宵節','情人節','母親節','父親節','端午節','中秋節','重陽節','聖誕節'],'其他':['生日快樂','結婚紀念日','退休祝福','旅途平安','勵志鼓勵','自訂主題']};
+const PROT='請以上傳照片作為唯一人物參考，嚴格保留人物原始臉孔及五官特徵，不得任意改變人物身份。保持眼睛、鼻子、耳朵、嘴巴、臉型、五官比例、髮型及膚色一致。只允許依照創作主題調整服裝、姿勢、場景、光線及藝術風格。';
+
+let st={th:null,off:0,style:null,cat:'全部',copies:[],ci:0};
+const tm=()=>document.querySelector('[name=tm]:checked').value;
+const pos=()=>document.querySelector('[name=pos]:checked').value;
+const ver=()=>document.querySelector('[name=ver]:checked').value;
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('show'),2200)}
+function opts(el,o){el.innerHTML=Object.keys(o).map(k=>`<option>${k}</option>`).join('')}
+
+function analyze(){
+ const v=$('theme').value.trim();if(!v){toast('請先輸入或選擇主題');return}
+ st.last=v;st.th=T.find(t=>t.k.some(k=>v.includes(k)))||{...DEF,n:v.replace(/圖$/,'')||v};
+ st.off=0;st.style=st.th.s[0];
+ st.copies=(st.th.cp?[st.th.cp]:[]).concat(X[st.th.n]||[],GEN(st.th.n));st.ci=0;
+ $('themeInfo').textContent=`視覺元素：${st.th.e}｜建議色彩：${st.th.c}`;
+ renderRec();renderGrid();renderCopies();fillCopy();
+}
+function renderRec(){
+ if(!st.th)return;const s=st.th.s,r=[0,1,2].map(i=>s[(st.off+i)%s.length]);
+ $('rec').innerHTML=r.map(i=>`<button class="chip ${st.style===i?'on':''}" data-s="${i}">${S[i][0]}</button>`).join('');
+ $('styleInfo').textContent=st.style===-1?'目前：自由創作（由 AI 依主題自選風格）':st.style==null?'':`目前風格：${S[st.style][0]}（${S[st.style][1]}）`;
+}
+function renderGrid(){
+ const q=$('q').value.trim().toLowerCase();
+ $('cats').innerHTML=['全部',...CATS].map(c=>`<button class="chip ${st.cat===c?'on':''}" data-c="${c}">${c}</button>`).join('');
+ $('grid').innerHTML=S.map((s,i)=>({s,i})).filter(({s,i})=>(st.cat==='全部'||CATS[Math.floor(i/5)]===st.cat)&&(!q||(s[0]+s[1]+s[2]).toLowerCase().includes(q)))
+ .map(({s,i})=>`<button class="sc ${st.style===i?'on':''}" data-s="${i}"><div class="sw" style="background:linear-gradient(90deg,${s[6]},${s[7]})"></div><b>${s[0]}</b><small>${s[1]}</small></button>`).join('')||'<p class="note">找不到符合的風格</p>';
+}
+function pick(i){st.style=i;renderRec();renderGrid()}
+function renderCopies(){
+ $('copies').innerHTML=st.copies.map((c,i)=>`<div class="cp ${i===st.ci?'on':''}" data-i="${i}"><i>${c[0]}</i>${c[1]}｜${c[2]}</div>`).join('')||'<p class="note">請先輸入主題</p>';
+}
+function fillCopy(){const c=st.copies[st.ci];if(!c)return;$('cTitle').value=c[1];$('cSub').value=c[2];$('cBody').value=c[3];$('cEnd').value=c[4];renderCopies()}
+const rnd=a=>a[Math.floor(Math.random()*a.length)];
+function inspire(){
+ if(!st.th){toast('請先輸入主題');return}
+ st.copies.push(['更多靈感',st.th.n,rnd(L3),`${rnd(L1)}，\n${rnd(L2)}，\n${rnd(L1)}，\n${rnd(L2)}。`,'祝福您']);
+ st.ci=st.copies.length-1;fillCopy();
+}
+
+function build(){
+ const th=st.th||{...DEF,n:$('theme').value.trim()},s=st.style>=0&&st.style!=null?S[st.style]:null,mode=tm();
+ const ratio=$('ratio').value,comp=COMP[$('comp').value],cp=COLOR[$('color').value],sig=$('sig').value.trim(),subj=$('subj').value.trim();
+ const t=$('cTitle').value.trim(),sub=$('cSub').value.trim(),body=$('cBody').value.trim(),end=$('cEnd').value.trim();
+ const pOn=$('pOn').checked,pm=$('pMode').value,prot=$('pProt').checked;
+ const theme=$('theme').value.trim()||th.n;
+ const style=s?`${s[0]}（${s[1]}）`:'自由創作（請依主題自行選擇最適合的藝術風格）';
+ const color=(cp?cp+'，':'')+(s?`參考色彩：${s[3]}`:`參考色彩：${th.c}`);
+ const light=s?s[4]:'柔和自然的光線';
+ const mainSubj=subj||`以${th.e}等元素組成精緻的畫面主體`;
+ const perMap={'保留寫實人物':'保留寫實人物','藝術插畫人物':'轉為藝術插畫人物','精緻3D Q版人物':'轉為精緻3D Q版人物','奇幻童話人物':'轉為奇幻童話人物','由所選風格決定':'依所選風格決定最適合的呈現方式'};
+ const person=pOn?`本次會附上人物參考照片。人物呈現方式：${perMap[pm]}。\n`+(prot?PROT:'人物以參考照片為基礎，可依主題與風格自由設計。'):'本次不使用人物參考照片，請不要加入任何特定真人面孔；請依照主題與風格自行設計合適的視覺主體。';
+ const subjFull=(pOn?'以上傳照片中的人物為畫面主角，':'')+mainSubj+'。';
+ let txtRule,copyBlock,sigBlock;
+ const drawSig=mode!=='none';
+ if(mode==='all'){
+  txtRule='請將以下文字直接清楚地繪製在圖片上，全部使用繁體中文，字體端正、清晰、易讀，不得缺字、錯字或變形。文字由大到小排列：主標題最大最醒目，副標題次之，內文較小，結尾短句最小。文字顏色須與背景有足夠對比，字體風格要與整體畫風協調。文字必須逐字照抄，不得改寫、增刪或替換。';
+  copyBlock=[t&&`主標題：${t}`,sub&&`副標題：${sub}`,body&&`內文：\n${body}`,end&&`結尾：${end}`].filter(Boolean).join('\n');
+ }else if(mode==='title'){
+  txtRule=`只在圖片上繪製主標題，使用繁體中文，字體端正清晰、不得缺字或錯字，必須逐字照抄。除主標題與署名外，不要繪製任何其他文字，其餘區域請保留乾淨的留白。`;
+  copyBlock=t?`主標題：${t}`:'（未設定主標題）';
+ }else{
+  txtRule='畫面中不要出現任何文字、字母、數字或符號，並依構圖預留乾淨的文字留白區，方便我之後自行加上文字。';
+  copyBlock='本次不在圖片上繪製文字。';
+ }
+ sigBlock=!sig?'不要加入任何署名、簽名或落款。':drawSig?`請在畫面${pos()}加入署名：「${sig}」。字體較小、優雅，與畫風協調，不要搶過主標題。`:'本次不繪製文字，因此不加入署名。';
+ const avoid=['不要出現簡體字、亂碼、錯字或多餘的文字','不要加入浮水印、商標或網址',!sig&&'不要自行添加署名','不要讓文字被裝飾遮住','不要出現變形的手、扭曲的臉孔或雜亂的背景'].filter(Boolean).join('；')+'。';
+ const quality='高解析度、細節豐富、構圖完整、色彩乾淨、邊緣清晰，具有專業插畫家或影像導演的完成度，適合在手機上分享與列印。';
+ const finalLine=`請根據以上所有設定，生成一張${ratio}的${style}${theme}圖。`+(mode==='none'?'畫面不含任何文字。':'圖片中的繁體中文文字必須與上方內容完全一致。')+'整體質感要精緻、細膩、有溫度。';
+ if(ver()==='short'){
+  return `請生成一張${ratio}的「${theme}」圖，風格為${style}：${s?s[2]:'由你依主題自行決定'}。\n\n畫面主體：${subjFull}\n色彩與光線：${color}；${light}。\n構圖：${comp}。\n\n${person}\n\n${txtRule}\n${mode==='none'?'':copyBlock+'\n'}\n${sigBlock}\n\n避免：${avoid}`;
+ }
+ return `【創作主題】\n請為我創作一張「${theme}」圖，傳遞溫暖、美好的祝福氛圍。\n\n【藝術風格】\n${style}。\n${s?s[2]+'。':'請依主題選擇最合適的藝術風格，並保持全圖風格一致。'}\n\n【畫面主體】\n${subjFull}\n\n【場景與裝飾】\n場景與裝飾圍繞${th.e}，精緻但不雜亂，並留出足夠空間給文字。${s?'\n材質與表現：'+s[2]+'。':''}\n\n【色彩與光線】\n${color}。\n光線：${light}。\n\n【構圖與比例】\n${ratio}。\n${comp}。${s?'\n風格構圖建議：'+s[5]+'。':''}\n\n【人物參考要求】\n${person}\n\n【圖片文字排版】\n${txtRule}\n\n【祝福文案】\n${copyBlock}\n\n【署名】\n${sigBlock}\n\n【畫質要求】\n${quality}\n\n【避免事項】\n${avoid}\n\n【最終生成指令】\n${finalLine}`;
+}
+function gen(){
+ if(!$('theme').value.trim()){toast('請先輸入或選擇主題');$('theme').focus();return}
+ if(!st.th)analyze();
+ $('out').value=build();
+ $('pHint').style.display=$('pOn').checked?'block':'none';
+ $('out').scrollIntoView({behavior:'smooth',block:'nearest'});toast('已產生提示詞');
+}
+async function copyText(){
+ if(!$('out').value)gen();const txt=$('out').value;if(!txt)return false;
+ try{await navigator.clipboard.writeText(txt);toast('已複製提示詞');return true}catch(e){}
+ try{const o=$('out');o.focus();o.select();const ok=document.execCommand('copy');o.setSelectionRange(0,0);if(ok){toast('已複製提示詞');return true}}catch(e){}
+ toast('複製失敗，請長按文字手動複製');return false;
+}
+async function openSite(u){const ok=await copyText();if(ok){toast('已複製，請在新開的頁面貼上');}window.open(u,'_blank','noopener')}
+function clearAll(){
+ ['theme','q','cTitle','cSub','cBody','cEnd','subj','out'].forEach(i=>$(i).value='');
+ $('sig').value='Michelle 祝福您';$('pOn').checked=false;$('pBox').style.display='none';$('pProt').checked=true;
+ $('pHint').style.display='none';$('themeInfo').textContent='';
+ document.querySelector('[name=tm][value=all]').checked=true;document.querySelector('[name=pos][value=右下角]').checked=true;document.querySelector('[name=ver][value=full]').checked=true;
+ ['ratio','comp','color','pMode'].forEach(i=>$(i).selectedIndex=0);
+ st={th:null,off:0,style:null,cat:'全部',copies:[],ci:0};
+ $('rec').innerHTML='';$('styleInfo').textContent='';renderGrid();renderCopies();syncSig();toast('已清空設定');
+}
+function syncSig(){$('posRow').style.display=$('sig').value.trim()?'flex':'none'}
+
+// 初始化
+$('quick').innerHTML=Object.entries(QUICK).map(([g,a])=>`<h3>${g}</h3><div class="chips">${a.map(x=>`<button class="chip" data-t="${x}">${x}</button>`).join('')}</div>`).join('');
+opts($('ratio'),RATIO);opts($('comp'),COMP);opts($('color'),COLOR);
+$('sigChips').innerHTML=['Michelle 祝福您','願您平安喜樂','敬賀'].map(x=>`<button class="chip" data-g="${x}">${x}</button>`).join('')+'<button class="chip" data-g="">不署名</button>';
+renderGrid();renderCopies();syncSig();
+$('quick').onclick=e=>{const b=e.target.closest('[data-t]');if(!b)return;$('theme').value=b.dataset.t==='自訂主題'?'':b.dataset.t;if(b.dataset.t==='自訂主題'){$('theme').focus();return}analyze()};
+$('theme').addEventListener('keydown',e=>{if(e.key==='Enter'){analyze();refresh()}});
+$('theme').addEventListener('change',()=>{if(!st.th||$('theme').value.trim()!==st.last)analyze()});
+$('rec').onclick=e=>{const b=e.target.closest('[data-s]');if(b)pick(+b.dataset.s)};
+$('grid').onclick=e=>{const b=e.target.closest('[data-s]');if(b)pick(+b.dataset.s)};
+$('cats').onclick=e=>{const b=e.target.closest('[data-c]');if(b){st.cat=b.dataset.c;renderGrid()}};
+$('q').oninput=renderGrid;
+$('reRec').onclick=()=>{if(!st.th){toast('請先輸入主題');return}st.off=(st.off+3)%st.th.s.length;st.style=st.th.s[st.off%st.th.s.length];renderRec();renderGrid()};
+$('free').onclick=()=>pick(-1);
+$('copies').onclick=e=>{const c=e.target.closest('[data-i]');if(c){st.ci=+c.dataset.i;fillCopy()}};
+$('reCopy').onclick=()=>{if(!st.copies.length){toast('請先輸入主題');return}st.ci=(st.ci+1)%st.copies.length;fillCopy()};
+$('more').onclick=inspire;
+$('sigChips').onclick=e=>{const b=e.target.closest('[data-g]');if(b){$('sig').value=b.dataset.g;syncSig()}};
+$('sig').oninput=syncSig;
+$('pOn').onchange=()=>$('pBox').style.display=$('pOn').checked?'block':'none';
+function refresh(){const o=$('out');if(!$('theme').value.trim()){o.value='';$('pHint').style.display='none';return}o.value=build();$('pHint').style.display=$('pOn').checked?'block':'none'}
+['input','change','click'].forEach(ev=>document.querySelector('.wrap').addEventListener(ev,e=>{const id=e.target.id;if(['out','copy','gpt','gem','clear'].includes(id)||(ev==='input'&&id==='theme'))return;setTimeout(refresh,0)}));
+document.querySelectorAll('[name=ver]').forEach(r=>r.onchange=()=>{if($('out').value)$('out').value=build()});
+$('copy').onclick=copyText;
+$('jump').onclick=()=>{if(!$('theme').value.trim()){toast('請先輸入或選擇主題');$('theme').focus();return}$('outSec').scrollIntoView({behavior:'smooth',block:'start'})};
+$('gpt').onclick=()=>openSite('https://chatgpt.com/');
+$('gem').onclick=()=>openSite('https://gemini.google.com/');
+$('clear').onclick=clearAll;
+</script>
+</body>
+</html>
